@@ -5,15 +5,15 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
+	"math"
 	"os"
 	"strings"
 	"time"
-	"math"
-	"encoding/json"
 
-	"github.com/openfaas-incubator/kafka-connector/types"
 	nsq "github.com/nsqio/go-nsq"
+	"github.com/openfaas-incubator/kafka-connector/types"
 )
 
 type connectorConfig struct {
@@ -68,12 +68,10 @@ func makeConsumer(nsqAddr string, config connectorConfig, topicMap *types.TopicM
 
 		num = (num + 1) % math.MaxInt32
 		log.Printf("[#%d] Received on [%v]: '%s'\n",
-					num,
-					msg.Topic,
-					msg.Value)
+			num,
+			msg.Topic,
+			msg.Value)
 		mcb(&msg)
-
-		r.Fin
 
 		return nil
 	}))
