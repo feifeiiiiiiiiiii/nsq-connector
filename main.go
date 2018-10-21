@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	nsq "github.com/nsqio/go-nsq"
@@ -40,17 +41,32 @@ func main() {
 		Client:     types.MakeClient(config.upstreamTimeout),
 	}
 
-	ticker := time.NewTicker(config.rebuildInterval)
-	go synchronizeLookups(ticker, &lookupBuilder, &topicMap)
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		ticker := time.NewTicker(config.rebuildInterval)
+		synchronizeLookups(ticker, &lookupBuilder, &topicMap)
+		wg.Done()
+	}()
 
 	nsqAddr := config.broker + ":4150"
-	makeConsumer(nsqAddr, config, &topicMap)
+
+	for _, topic := range config.topics {
+		wg.Add(1)
+		go func(nsqAddr string, topic string) {
+			makeConsumer(nsqAddr, topic, config, &topicMap)
+			wg.Done()
+		}(nsqAddr, topic)
+	}
+	
+	wg.Wait()
 }
 
-func makeConsumer(nsqAddr string, config connectorConfig, topicMap *types.TopicMap) {
+func makeConsumer(nsqAddr string, topic string, config connectorConfig, topicMap *types.TopicMap) {
 	num := 0
 
-	r, err := nsq.NewConsumer("test_topic", "openfaas-channel", nsq.NewConfig())
+	r, err := nsq.NewConsumer(topic, "openfaas-channel", nsq.NewConfig())
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -82,6 +98,8 @@ func makeConsumer(nsqAddr string, config connectorConfig, topicMap *types.TopicM
 	}
 
 	<-r.StopChan
+
+	return
 }
 
 func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(msg *ConsumerMessage) {
