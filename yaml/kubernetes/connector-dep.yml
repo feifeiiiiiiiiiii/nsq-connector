@@ -1,0 +1,26 @@
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nsq
+    component: nsq-connector
+  name: nsq-connector
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nsq
+        component: nsq-connector
+    spec:
+      containers:
+      - name: nsq
+        image: feifeiiiiiiiiiii/nsq-connector:0.0.1
+        env:
+          - name: gateway_url
+            value: "http://gateway.openfaas:8080"
+          - name: topics
+            value: "faas-request,"
+          - name: print_response
+            value: "true"

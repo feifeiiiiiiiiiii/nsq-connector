@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nsq
+  labels:
+    app: nsq
+    component: nsq-broker
+spec:
+  ports:
+  - port: 4150
+    name: nsq-port
+    targetPort: 4150
+    protocol: TCP
+  selector:
+    app: nsq
+    component: nsq-broker
+---

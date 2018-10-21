@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nsq
+    component: nsq-broker
+  name: nsq-broker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nsq
+        component: nsq-broker
+    spec:
+      containers:
+      - name: nsq
+        image: nsqio/nsq
+        ports:
+        - containerPort: 4150
