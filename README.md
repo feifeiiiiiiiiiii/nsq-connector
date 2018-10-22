@@ -1,4 +1,4 @@
-# nsq-connector
+# NSQ-connector
 The NSQ connector connects OpenFaaS functions to NSQ topics, inspired by [Kafka-connector](https://github.com/openfaas-incubator/kafka-connector) project
 
 # Deploy steps
