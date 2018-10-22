@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nsq
-        image: feifeiiiiiiiiiii/nsq-connector:0.0.1
+        image: feifeiiiiiiiiiii/nsq-connector:0.0.2
         env:
           - name: gateway_url
             value: "http://gateway.openfaas:8080"
