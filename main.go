@@ -59,7 +59,7 @@ func main() {
 			wg.Done()
 		}(nsqAddr, topic)
 	}
-	
+
 	wg.Wait()
 }
 
@@ -119,7 +119,7 @@ func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(m
 
 func buildConnectorConfig() connectorConfig {
 
-	broker := "127.0.0.1"
+	broker := "nsq"
 	if val, exists := os.LookupEnv("broker_host"); exists {
 		broker = val
 	}

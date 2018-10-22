@@ -6,11 +6,18 @@ metadata:
     app: nsq
     component: nsq-broker
 spec:
+  type: NodePort
   ports:
   - port: 4150
-    name: nsq-port
+    name: tcp
     targetPort: 4150
     protocol: TCP
+    nodePort: 30150
+  - port: 4151
+    name: http
+    targetPort: 4151
+    protocol: TCP
+    nodePort: 30151
   selector:
     app: nsq
     component: nsq-broker

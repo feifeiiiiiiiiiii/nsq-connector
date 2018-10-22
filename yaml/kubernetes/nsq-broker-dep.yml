@@ -18,3 +18,6 @@ spec:
         image: nsqio/nsq
         ports:
         - containerPort: 4150
+        - containerPort: 4151
+        command:
+        - /usr/local/bin/nsqd
