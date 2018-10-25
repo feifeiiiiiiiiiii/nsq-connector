@@ -23,10 +23,10 @@ type connectorConfig struct {
 	topics          []string
 	printResponse   bool
 	rebuildInterval time.Duration
-	broker          string
+	nsqlookupd      string
 }
 
-type ConsumerMessage struct {
+type consumerMessage struct {
 	Topic string
 	Value string
 }
@@ -50,20 +50,20 @@ func main() {
 		wg.Done()
 	}()
 
-	nsqAddr := config.broker + ":4150"
+	nsqLookupdAddr := config.nsqlookupd + ":4161"
 
 	for _, topic := range config.topics {
 		wg.Add(1)
-		go func(nsqAddr string, topic string) {
-			makeConsumer(nsqAddr, topic, config, &topicMap)
+		go func(nsqLookupAddr, topic string) {
+			makeConsumer(nsqLookupAddr, topic, config, &topicMap)
 			wg.Done()
-		}(nsqAddr, topic)
+		}(nsqLookupdAddr, topic)
 	}
 
 	wg.Wait()
 }
 
-func makeConsumer(nsqAddr string, topic string, config connectorConfig, topicMap *types.TopicMap) {
+func makeConsumer(nsqLookupAddr string, topic string, config connectorConfig, topicMap *types.TopicMap) {
 	num := 0
 
 	r, err := nsq.NewConsumer(topic, "openfaas-channel", nsq.NewConfig())
@@ -75,7 +75,7 @@ func makeConsumer(nsqAddr string, topic string, config connectorConfig, topicMap
 
 	r.AddHandler(nsq.HandlerFunc(func(m *nsq.Message) error {
 
-		var msg ConsumerMessage
+		var msg consumerMessage
 		err := json.Unmarshal(m.Body, &msg)
 		if err != nil {
 			log.Println("consumer error: ", err)
@@ -92,7 +92,7 @@ func makeConsumer(nsqAddr string, topic string, config connectorConfig, topicMap
 		return nil
 	}))
 
-	err = r.ConnectToNSQD(nsqAddr)
+	err = r.ConnectToNSQLookupd(nsqLookupAddr)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -102,7 +102,7 @@ func makeConsumer(nsqAddr string, topic string, config connectorConfig, topicMap
 	return
 }
 
-func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(msg *ConsumerMessage) {
+func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(msg *consumerMessage) {
 
 	invoker := types.Invoker{
 		PrintResponse: config.printResponse,
@@ -110,7 +110,7 @@ func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(m
 		GatewayURL:    config.gatewayURL,
 	}
 
-	mcb := func(msg *ConsumerMessage) {
+	mcb := func(msg *consumerMessage) {
 		val := []byte(msg.Value)
 		invoker.Invoke(topicMap, msg.Topic, &val)
 	}
@@ -119,9 +119,9 @@ func makeMessageHandler(topicMap *types.TopicMap, config connectorConfig) func(m
 
 func buildConnectorConfig() connectorConfig {
 
-	broker := "nsq"
-	if val, exists := os.LookupEnv("broker_host"); exists {
-		broker = val
+	nsqlookupd := "nsqlookupd"
+	if val, exists := os.LookupEnv("nsqlookupd_host"); exists {
+		nsqlookupd = val
 	}
 
 	topics := []string{}
@@ -168,7 +168,7 @@ func buildConnectorConfig() connectorConfig {
 		upstreamTimeout: upstreamTimeout,
 		topics:          topics,
 		rebuildInterval: rebuildInterval,
-		broker:          broker,
+		nsqlookupd:      nsqlookupd,
 		printResponse:   printResponse,
 	}
 }

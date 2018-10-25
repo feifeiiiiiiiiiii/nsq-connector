@@ -1,7 +1,7 @@
 # NSQ-connector
 The NSQ connector connects OpenFaaS functions to NSQ topics, inspired by [Kafka-connector](https://github.com/openfaas-incubator/kafka-connector) project
 
-# Deploy steps
+# Deploy K8s Steps
 
 1. First you must setup `faas` project in k8s
 
@@ -47,3 +47,16 @@ curl -H "Accept: application/json" -XPOST --data '{"topic": "nsq-fn-topic","valu
 ```
 
 6. Good luck have fun
+
+## Configuration
+
+This configuration can be set in the YAML files for Kubernetes or Swarm.
+
+| env_var               | description                                                 |
+| --------------------- |----------------------------------------------------------   |
+| `upstream_timeout`      | Go duration - maximum timeout for upstream function call    |
+| `rebuild_interval`      | Go duration - interval for rebuilding function to topic map |
+| `topics`                | Topics to which the connector will bind                     |
+| `gateway_url`           | The URL for the API gateway i.e. http://gateway:8080 or http://gateway.openfaas:8080 for Kubernetes       |
+| `nsqlookupd`           | Default is `nsqlookupd`                                          |
+| `print_response`        | Default is `true` - this will output the response of calling a function in the logs |

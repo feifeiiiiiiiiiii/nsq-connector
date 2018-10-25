@@ -21,3 +21,8 @@ spec:
         - containerPort: 4151
         command:
         - /usr/local/bin/nsqd
+        args:
+          - -lookupd-tcp-address
+          - nsqlookupd:4160
+          - -broadcast-address
+          - nsq

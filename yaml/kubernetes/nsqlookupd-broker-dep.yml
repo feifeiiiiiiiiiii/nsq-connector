@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nsqlookupd
+    component: nsqlookupd-broker
+  name: nsqlookupd-broker
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nsqlookupd
+        component: nsqlookupd-broker
+    spec:
+      containers:
+      - name: nsqlookupd
+        image: nsqio/nsq
+        ports:
+        - containerPort: 4150
+        - containerPort: 4151
+        command:
+        - /usr/local/bin/nsqlookupd
